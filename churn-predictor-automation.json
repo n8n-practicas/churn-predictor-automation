@@ -1,0 +1,481 @@
+{
+  "name": "churn-predictor-automation",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "triggerAtDay": [
+                1
+              ],
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "e50e44cb-126d-46b4-abd1-bdece1f9599e",
+      "name": "Weekly Schedule - Monday 8am"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1v4I0kew_gsx4ntUJPMAsN01cSjvr-WMI8IW9-OI_pcs",
+          "mode": "list",
+          "cachedResultName": "Customer Churn Predictor",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1v4I0kew_gsx4ntUJPMAsN01cSjvr-WMI8IW9-OI_pcs/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Customer Churn Predictor",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1v4I0kew_gsx4ntUJPMAsN01cSjvr-WMI8IW9-OI_pcs/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        208,
+        0
+      ],
+      "id": "87ec8259-393f-47c8-9268-e2a3b453f3bf",
+      "name": "Read Customers",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "TDkXM9NksELL9TVY",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://quiet-owls-sell.loca.lt/predict",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "gender",
+              "value": "={{ $json.gender }}"
+            },
+            {
+              "name": "SeniorCitizen",
+              "value": "={{ $json.SeniorCitizen }}"
+            },
+            {
+              "name": "Partner",
+              "value": "={{ $json.Partner }}"
+            },
+            {
+              "name": "Dependents",
+              "value": "={{ $json.Dependents }}"
+            },
+            {
+              "name": "tenure",
+              "value": "={{ $json.tenure }}"
+            },
+            {
+              "name": "PhoneService",
+              "value": "={{ $json.PhoneService }}"
+            },
+            {
+              "name": "MultipleLines",
+              "value": "={{ $json.MultipleLines }}"
+            },
+            {
+              "name": "InternetService",
+              "value": "={{ $json.InternetService }}"
+            },
+            {
+              "name": "OnlineSecurity",
+              "value": "={{ $json.OnlineSecurity }}"
+            },
+            {
+              "name": "OnlineBackup",
+              "value": "={{ $json.OnlineBackup }}"
+            },
+            {
+              "name": "DeviceProtection",
+              "value": "={{ $json.DeviceProtection }}"
+            },
+            {
+              "name": "TechSupport",
+              "value": "={{ $json.TechSupport }}"
+            },
+            {
+              "name": "StreamingTV",
+              "value": "={{ $json.StreamingTV }}"
+            },
+            {
+              "name": "StreamingMovies",
+              "value": "={{ $json.StreamingMovies }}"
+            },
+            {
+              "name": "Contract",
+              "value": "={{ $json.Contract }}"
+            },
+            {
+              "name": "PaperlessBilling",
+              "value": "={{ $json.PaperlessBilling }}"
+            },
+            {
+              "name": "PaymentMethod",
+              "value": "={{ $json.PaymentMethod }}"
+            },
+            {
+              "name": "MonthlyCharges",
+              "value": "={{ $json.MonthlyCharges }}"
+            },
+            {
+              "name": "TotalCharges",
+              "value": "={{ $json.TotalCharges }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        416,
+        0
+      ],
+      "id": "0ed830a0-fa6a-4fe8-af39-64ddcda14547",
+      "name": "Predict Churn"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1v4I0kew_gsx4ntUJPMAsN01cSjvr-WMI8IW9-OI_pcs",
+          "mode": "list",
+          "cachedResultName": "Customer Churn Predictor",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1v4I0kew_gsx4ntUJPMAsN01cSjvr-WMI8IW9-OI_pcs/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Customer",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1v4I0kew_gsx4ntUJPMAsN01cSjvr-WMI8IW9-OI_pcs/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number": "={{ $('Read Customers').item.json.row_number }}",
+            "churn_probability": "={{ $json.probabilidad_churn }}",
+            "result": "={{ $json.resultado }}",
+            "risk": "={{ $json.riesgo }}"
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "gender",
+              "displayName": "gender",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "SeniorCitizen",
+              "displayName": "SeniorCitizen",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Partner",
+              "displayName": "Partner",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Dependents",
+              "displayName": "Dependents",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "tenure",
+              "displayName": "tenure",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "PhoneService",
+              "displayName": "PhoneService",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "MultipleLines",
+              "displayName": "MultipleLines",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "InternetService",
+              "displayName": "InternetService",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "OnlineSecurity",
+              "displayName": "OnlineSecurity",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "OnlineBackup",
+              "displayName": "OnlineBackup",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "DeviceProtection",
+              "displayName": "DeviceProtection",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "TechSupport",
+              "displayName": "TechSupport",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "StreamingTV",
+              "displayName": "StreamingTV",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "StreamingMovies",
+              "displayName": "StreamingMovies",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Contract",
+              "displayName": "Contract",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "PaperlessBilling",
+              "displayName": "PaperlessBilling",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "PaymentMethod",
+              "displayName": "PaymentMethod",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "MonthlyCharges",
+              "displayName": "MonthlyCharges",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "TotalCharges",
+              "displayName": "TotalCharges",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "churn_probability",
+              "displayName": "churn_probability",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "result",
+              "displayName": "result",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "risk",
+              "displayName": "risk",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        624,
+        0
+      ],
+      "id": "e5a106c5-8dea-445b-997e-390a46ffdeba",
+      "name": "Save Results",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "TDkXM9NksELL9TVY",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "This project builds a binary classification neural network that predicts customer churn probability, integrated with an automated n8n workflow that reads customer data from Google Sheets, calls the prediction API, and automatically writes the results back every Monday at 8 a.m.",
+        "height": 208,
+        "width": 256,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -320,
+        -48
+      ],
+      "typeVersion": 1,
+      "id": "74a177ff-3cf4-4ea5-a8ff-25d9abd8bfb5",
+      "name": "Sticky Note"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Weekly Schedule - Monday 8am": {
+      "main": [
+        [
+          {
+            "node": "Read Customers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Customers": {
+      "main": [
+        [
+          {
+            "node": "Predict Churn",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Predict Churn": {
+      "main": [
+        [
+          {
+            "node": "Save Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "dc93e8ec-e767-4e74-87b6-b7b64939a1da",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d03888bb0cda25df4a1ad3851243475954ca91ddd3233540aafb991b7f0a1834"
+  },
+  "id": "DDBF6rBWNdrP4ruY",
+  "tags": []
+}
